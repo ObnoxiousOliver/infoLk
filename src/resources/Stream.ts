@@ -3,14 +3,13 @@ import { Content, ContentBlock } from "./Content";
 import { mergeTextStyles, TextStyle } from "./TextStyle";
 import { createFocusTrap } from "focus-trap";
 import { Display } from "./Display";
-import { createSignal, Signal } from "solid-js";
 
 export type StreamEvents = 'data' | 'write' | 'clear' | 'input'
 
 export type StreamData = (Content | Content[] | StreamData)[]
 
 export class Stream {
-  private data: Signal<StreamData> = createSignal<StreamData>([])
+  private data: StreamData = []
 
   public get dataSignal() {
     return this.data
@@ -18,7 +17,8 @@ export class Stream {
 
   constructor() {}
 
-  public read(): Content[] {
+  // Split the data into lines
+  public read(): Content[][] {
     function read(data: StreamData): Content[] {
       return data.flatMap((content) => {
         if (typeof content === 'string') {
@@ -31,33 +31,58 @@ export class Stream {
       })
     }
 
-    return read(this.data[0]())
+    const flattendContent = read(this.data)
+
+    //Split the data into lines
+
+    const lines: Content[][] = []
+    let line: Content[] = []
+
+    for (const content of flattendContent) {
+      if (typeof content === 'string') {
+        if (content.includes('\n')) {
+          const splittedContent = content.split('\n')
+
+          for (let i = 0; i < splittedContent.length; i++) {
+            line.push(ContentBlock.from(splittedContent[i]))
+            if (i < splittedContent.length - 1) {
+              lines.push(line)
+              line = []
+            }
+          }
+        } else {
+          line.push(content)
+        }
+      } else {
+        if (content.text().includes('\n')) {
+          const splittedContent = content.text().split('\n')
+
+          for (let i = 0; i < splittedContent.length; i++) {
+            line.push(ContentBlock.from(splittedContent[i], content.style))
+            if (i < splittedContent.length - 1) {
+              lines.push(line)
+              line = []
+            }
+          }
+        } else {
+          line.push(content)
+        }
+      }
+    }
+
+    if (line.length > 0) {
+      lines.push(line)
+    }
+    
+    return lines
   }
 
   public write(content: Content | Content[]): void {
-    const data = this.data[0]()
+    const data = this.data
     const newData = [...data, content]
-    this.data[1](newData)
-    // this.emit('data', this.copy())
-    // this.emit('write', this.copy())
+    this.data = newData
+    this.emit('data', this.read())
   }
-
-  // public copy(): Content[] {
-  //   // function copy(data: StreamData): Content[] {
-  //   //   return data.flatMap((content) => {
-  //   //     if (typeof content === 'string') {
-  //   //       return content
-  //   //     } else if (Array.isArray(content)) {
-  //   //       return copy(content)
-  //   //     } else {
-  //   //       return content.copy()
-  //   //     }
-  //   //   })
-  //   // }
-
-  //   // return copy(this.data)
-  //   return [...this.read()]
-  // }
 
   public writeLn(content?: Content | Content[]): void {
     content && this.write(content)
@@ -436,7 +461,8 @@ export class Stream {
 
           let block: ContentBlock[] = splittedString.flatMap((line) => [options?.formatLine?.(line).map(x => typeof x === 'string' ? ContentBlock.from(x) : x) ?? ContentBlock.from(line), ContentBlock.from(' \n')]).flat(1)
 
-          this.data[1](this.data[0]().slice(0, this.data[0]().length - 1))
+          this.data = this.data.slice(0, this.data.length - 1)
+          this.emit('data', this.read())
 
           const newBlock: ContentBlock[] = []
           for (let i = 0; i < block.length; i++) {
@@ -481,8 +507,8 @@ export class Stream {
           }
 
           // this.data.push(block)
-          this.data[1]([...this.data[0](), block])
-          // this.emit('data', this.copy())
+          this.data = [...this.data, block]
+          this.emit('data', this.read())
 
           // #region Suggestions
           const suggestionOptions = options?.suggestion?.(i.slice(0, cursor.selectionStart))
@@ -599,10 +625,9 @@ export class Stream {
             }))(input.input().slice(0, input.cursor().selectionStart))
             const block: ContentBlock[] = (preview + input.input().slice(input.cursor().selectionStart)).split('\n')
               .flatMap((line) => [options?.formatLine?.(line).map(x => typeof x === 'string' ? ContentBlock.from(x) : x) ?? ContentBlock.from(line), ContentBlock.from(' \n')]).flat(1)
-            // this.data = this.data.slice(0, this.data.length - 1)
-            // this.data.push(block)
-            this.data[1]([...this.data[0]().slice(0, this.data[0]().length - 1), block])
-            // this.emit('data', this.copy())
+
+            this.data = [...this.data.slice(0, this.data.length - 1), block]
+            this.emit('data', this.read())
 
             const suggestionsMenu = document.querySelector('#suggestions-menu') as HTMLDivElement
             if (!suggestionsMenu) return
@@ -647,15 +672,15 @@ export class Stream {
               suggestionIndex = -1
 
               // this.data = this.data.slice(0, this.data.length - 1)
-              this.data[1](this.data[0]().slice(0, this.data[0]().length - 1))
+              this.data = this.data.slice(0, this.data.length - 1)
+              this.emit('data', this.read())
 
               const splittedString = input.input().split('\n')
               const block: ContentBlock[] = splittedString.flatMap((line) => [options?.formatLine?.(line).map(x => typeof x === 'string' ? ContentBlock.from(x) : x) ?? ContentBlock.from(line), ContentBlock.from(' \n')]).flat(1)
 
               // this.data.push(block)
-              this.data[1]([...this.data[0](), block])
-
-              // this.emit('data', this.copy())
+              this.data = [...this.data, block]
+              this.emit('data', this.read())
               input.close()
             }
           } else if (e.key === 'Escape') {
@@ -689,14 +714,15 @@ export class Stream {
           suggestionIndex = -1
 
           // this.data = this.data.slice(0, this.data.length - 1)
-          this.data[1](this.data[0]().slice(0, this.data[0]().length - 1))
+          this.data = this.data.slice(0, this.data.length - 1)
+          this.emit('data', this.read())
 
           const splittedString = input.input().split('\n')
           const block: ContentBlock[] = splittedString.flatMap((line) => [options?.formatLine?.(line).map(x => typeof x === 'string' ? ContentBlock.from(x) : x) ?? ContentBlock.from(line), ContentBlock.from(' \n')]).flat(1)
 
           // this.data.push(block)
-          this.data[1]([...this.data[0](), block])
-          // this.emit('data', this.copy())
+          this.data = [...this.data, block]
+          this.emit('data', this.read())
 
           resolve(input.input())
         })
@@ -706,9 +732,8 @@ export class Stream {
 
   public clear(): void {
     // this.data = []
-    this.data[1]([])
-    // this.emit('data', this.copy())
-    // this.emit('clear', this.copy())
+    this.data = []
+    this.emit('data', this.read())
   }
 
   public length(): number {
@@ -724,44 +749,44 @@ export class Stream {
       }, 0)
     }
 
-    return length(this.data[0]())
+    return length(this.data)
   }
 
-  // private listerners: {
-  //   [event in StreamEvents]?: ((data: Content[]) => void)[]
-  // } = {}
-  // public on(event: StreamEvents, callback: (data: Content[]) => void) {
-  //   if (!this.listerners[event]) {
-  //     this.listerners[event] = []
-  //   }
+  private listerners: {
+    [event in StreamEvents]?: ((data: Content[][]) => void)[]
+  } = {}
+  public on(event: StreamEvents, callback: (data: Content[][]) => void) {
+    if (!this.listerners[event]) {
+      this.listerners[event] = []
+    }
 
-  //   this.listerners[event].push(callback)
+    this.listerners[event].push(callback)
 
-  //   return () => {
-  //     this.off(event, callback)
-  //   }
-  // }
+    return () => {
+      this.off(event, callback)
+    }
+  }
 
-  // public off(event: StreamEvents, callback: (data: Content[]) => void): void {
-  //   if (this.listerners[event]) {
-  //     this.listerners[event] = this.listerners[event].filter((cb) => cb !== callback)
-  //   }
-  // }
+  public off(event: StreamEvents, callback: (data: Content[][]) => void): void {
+    if (this.listerners[event]) {
+      this.listerners[event] = this.listerners[event].filter((cb) => cb !== callback)
+    }
+  }
 
-  // public once(event: StreamEvents, callback: (data: Content[]) => void) {
-  //   const off = this.on(event, (data) => {
-  //     off()
-  //     callback(data)
-  //   })
+  public once(event: StreamEvents, callback: (data: Content[][]) => void) {
+    const off = this.on(event, (data) => {
+      off()
+      callback(data)
+    })
 
-  //   return off
-  // }
+    return off
+  }
 
-  // public emit(event: StreamEvents, data: Content[]): void {
-  //   if (this.listerners[event]) {
-  //     this.listerners[event].forEach((callback) => {
-  //       callback(data)
-  //     })
-  //   }
-  // }
+  public emit(event: StreamEvents, data: Content[][]): void {
+    if (this.listerners[event]) {
+      this.listerners[event].forEach((callback) => {
+        callback(data)
+      })
+    }
+  }
 }

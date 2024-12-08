@@ -1,23 +1,61 @@
+<script setup lang="ts">
+import { onMounted, ref, watch } from "vue";
+import { TerminalRenderer } from "../resources/TerminalRenderer"
+import { Content } from "../resources/Content";
+import { OS } from "../resources/OS";
+import ContentRenderer from "./ContentRenderer.vue";
+
+const terminalRenderer = new TerminalRenderer()
+
+const data = ref<Content[][]>([])
+
+terminalRenderer.stream.on('data', (content) => {
+  data.value = content
+})
+
+const terminalWindow = ref<HTMLElement | null>(null)
+watch(data, () => {
+  scrollToBottom()
+})
+
+function scrollToBottom() {
+  terminalWindow.value?.scrollTo({
+    top: terminalWindow.value.scrollHeight,
+    behavior: 'instant',
+  })
+}
+
+onMounted(async () => {
+  const os = new OS(terminalRenderer.stream)
+
+  while(true) {
+    await os.run()
+  }
+})
+</script>
+
+<template>
+  <div
+    class="terminalWindow"
+    id="terminalWindow"
+    ref="terminalWindow"
+  >
+    <div class="spacer" />
+    <pre><span v-for="(line, index) in data" :key="(index)"><ContentRenderer
+      v-for="content in line"
+      :key="content.toString()"
+      :content="content"
+    /><br></span><label class="screenLabel" for="input" @click="scrollToBottom" /></pre>
+  </div>
+</template>
+
+<style lang="css" scoped>
 .terminalWindow {
   color: white;
   height: 100%;
-  line-height: 1.25;
+  line-height: 1.3;
 
   overflow-y: auto;
-  display: flex;
-  flex-direction: column-reverse;
-
-  /* Hide Scrollbar */
-  scrollbar-width: none;
-  -ms-overflow-style: none;
-
-  /* Hide Scrollbar Firefox */
-  scrollbar-color: transparent transparent;
-
-  /* Hide Scrollbar Chrome */
-  &::-webkit-scrollbar {
-    width: 0;
-  }
 
   &::before {
     content: '';
@@ -58,15 +96,18 @@
   }
 
   pre {
-    font-family: inherit;
     padding: .75rem;
+    display: block;
+    font-family: inherit;
     overflow: visible;
     position: relative;
     white-space: pre-wrap;
     word-wrap: break-word;
+    /* min-height: 100%; */
   }
 
   .spacer {
     flex-grow: 1;
   }
 }
+</style>
