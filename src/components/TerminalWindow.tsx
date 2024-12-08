@@ -1,4 +1,4 @@
-import { createSignal } from "solid-js"
+import { createEffect } from "solid-js"
 import { TerminalRenderer } from "../resources/TerminalRenderer"
 import ContentRenderer from "./ContentRenderer"
 
@@ -7,21 +7,32 @@ import { OS } from "../resources/OS"
 
 function TerminalWindow () {
   const terminalRenderer = new TerminalRenderer()
-  const [content, setContent] = createSignal(terminalRenderer.stream.read())
-
-  terminalRenderer.stream.on('data', (data) => {
-    setContent(data)
-  })
 
   const os = new OS(terminalRenderer.stream)
-  os.boot()
+  ;(async () => {
+    while(true) {
+      await os.run()
+    }
+  })()
+  
+  createEffect(() => {
+    terminalRenderer.stream.read()
+    const terminalWindow = document.getElementById('terminalWindow')
+
+    if (terminalWindow === null) return
+
+    terminalWindow.scrollTop = terminalWindow.scrollHeight
+  })
 
   return <div class="terminalWindow" id="terminalWindow">
+    <div class="spacer"></div>
     <pre>{
-      content().map((content) => (
+      terminalRenderer.stream.read().map((content) => (
         <ContentRenderer content={content} />
       ))
-    }</pre>
+    }
+      <label class="screenLabel" for="input"></label>
+    </pre>
   </div>
 }
 

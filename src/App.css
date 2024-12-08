@@ -8,18 +8,30 @@
 #suggestions-menu {
   position: fixed;
   background: #222;
-  border: 2px solid #333;
+  border: .125rem solid #333;
   color: white;
-  min-width: 200px;
-  font-family: 'JetBrains Mono', monospace;
+  min-width: min(10rem, 100vw);
+  max-width: calc(100vw - 1rem);
+  max-height: 50vh;
+  overflow-y: auto;
 
   .suggestion {
     cursor: pointer;
     padding: 0.5rem .75rem;
+    display: flex;
+    flex-flow: column nowrap;
 
-    &:hover, &.selected {
+    &:hover {
+      background: #333;
+    }
+    &.selected {
       background: #fff;
       color: #000;
+    }
+
+    .suggestion-description {
+      font-size: 0.75rem;
+      color: #aaa;
     }
   }
 }

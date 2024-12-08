@@ -10,4 +10,8 @@ export class TextFile extends FileElement {
     this.name = name
     this.content = content
   }
+
+  toString(): string {
+    return this.content
+  }
 }

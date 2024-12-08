@@ -40,6 +40,16 @@ export class TextStyle {
     this.blink = options.blink
     this.id = options.id
   }
+
+  isEqual(other: TextStyle) {
+    return this.color?.hex() === other.color?.hex() &&
+      this.backgroundColor?.hex() === other.backgroundColor?.hex() &&
+      this.weight === other.weight &&
+      this.italic === other.italic &&
+      this.underline === other.underline &&
+      this.strikeThrough === other.strikeThrough &&
+      this.blink === other.blink
+  }
 }
 
 export function textStyleToCss(textStyle: TextStyle) {
@@ -50,12 +60,12 @@ export function textStyleToCss(textStyle: TextStyle) {
     '--text-color-g': textStyle.color?.rgb().green(),
     '--text-color-b': textStyle.color?.rgb().blue(),
 
-    fontWeight: textStyle.weight?.toString(),
-    fontStyle: textStyle.italic ? 'italic' : '',
+    'font-weight': textStyle.weight?.toString(),
+    'font-style': textStyle.italic ? 'italic' : '',
 
     animation: textStyle.blink ? 'blink 1.2s -.6s step-end infinite' : '',
 
-    textDecoration: (textStyle.underline || textStyle.strikeThrough) ? [
+    'text-decoration': (textStyle.underline || textStyle.strikeThrough) ? [
       textStyle.underline ? 'underline' : '',
       textStyle.strikeThrough ? 'line-through' : ''
     ].join(' ') : ''

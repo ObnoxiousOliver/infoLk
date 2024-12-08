@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "color": "^4.2.3",
+    "focus-trap": "^7.6.2",
     "solid-js": "^1.9.3",
     "ua-parser-js": "^2.0.0"
   },
