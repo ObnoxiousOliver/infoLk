@@ -5,8 +5,6 @@ export class Display {
     const span = document.createElement('span')
     span.style.visibility = 'hidden'
     span.style.position = 'absolute'
-    span.style.whiteSpace = 'pre'
-    // span.style.font = 'JetBrains Mono, monospace'
     span.textContent = 'X'
 
     ;(document.querySelector('#terminalWindow') ?? document.body)?.appendChild(span)

@@ -41,6 +41,18 @@ export class TextStyle {
     this.id = options.id
   }
 
+  toString() {
+    return [
+      this.color?.hex(),
+      this.backgroundColor?.hex(),
+      this.weight?.toString(),
+      this.italic ? 'italic' : '',
+      this.underline ? 'underline' : '',
+      this.strikeThrough ? 'line-through' : '',
+      this.blink ? 'blink' : ''
+    ].join(' ')
+  }
+
   isEqual(other: TextStyle) {
     return this.color?.hex() === other.color?.hex() &&
       this.backgroundColor?.hex() === other.backgroundColor?.hex() &&

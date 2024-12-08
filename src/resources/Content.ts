@@ -11,6 +11,10 @@ export class ContentBlock {
     this.style = style
   }
 
+  toString(): string {
+    return this.content + this.style.toString()
+  }
+
   /**
    * Searches for the index of the content in the content block.
    */
