@@ -15,7 +15,7 @@ import TerminalWindow from "./components/TerminalWindow.vue"
 
 body, html, #root {
   position: fixed;
-  inset: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  inset: 0;
   background-color: black;
   color: white;
   overflow: hidden;
@@ -35,7 +35,7 @@ body, html, #root {
 }
 
 #suggestions-menu {
-  position: fixed;
+  position: absolute;
   background: #222;
   border: .125rem solid #333;
   color: white;

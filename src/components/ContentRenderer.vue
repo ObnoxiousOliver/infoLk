@@ -38,14 +38,13 @@ defineProps<{
     v-else
     :id="content.style.id"
     :style="textStyleToCss(content.style)"
-  >
-    <span
+  >{{ content.text() }}</span>
+    <!-- <span
       v-for="char in content.text().split('')"
       :key="char"
       :style="char === '\n' ? {} : {
         display: 'inline-block',
         width: '.66rem',
       }"
-    >{{ char }}</span>
-  </span>
+    >{{ char }}</span> -->
 </template>

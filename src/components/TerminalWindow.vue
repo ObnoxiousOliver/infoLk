@@ -87,11 +87,14 @@ onMounted(async () => {
   .screenLabel {
     position: absolute;
     inset: 0;
-    min-height: calc(100svh - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    min-height: 100svh;
   }
 
   pre span {
-    text-shadow: -.05rem 0 0 rgb(var(--text-color-r, 255), 0, 0), .05rem 0 0 rgb(0, var(--text-color-g, 255), var(--text-color-b, 255));
+    text-shadow:
+      -.05rem 0 0 rgb(var(--text-color-r, 255), 0, 0),
+      .05rem 0 0 rgb(0, var(--text-color-g, 255), var(--text-color-b, 255))
+    ;
     mix-blend-mode: difference;
   }
 
