@@ -14,10 +14,6 @@ export class Directory extends FileElement {
       child.parent = this
     })
   }
-
-  getSize(): number {
-    return this.children.reduce((acc, child) => acc + child.getSize(), 0)
-  }
 }
 
 export class AliasDirectory extends Directory {
@@ -27,23 +23,5 @@ export class AliasDirectory extends Directory {
 
   toPath(): string {
     return this.alias
-  }
-
-  toPathFromChild() {
-    return this.alias
-  }
-}
-
-export class RootDirectory extends Directory {
-  constructor(children: FileElement[] = []) {
-    super('root', children)
-  }
-
-  toPath(): string {
-    return '/'
-  }
-
-  toPathFromChild() {
-    return ''
   }
 }

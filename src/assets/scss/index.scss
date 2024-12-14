@@ -1,0 +1,70 @@
+@import '/src/assets/fonts/JetBrainsMono';
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body, html, #app {
+  background: black;
+  color: white;
+  height: 100%;
+  font-family: 'JetBrains Mono', 'Consolas', 'Courier New', monospace;
+  font-variant-ligatures: none;
+}
+
+#app {
+  height: 100%;
+  overflow-y: scroll;
+
+  &.anchor-bottom {
+    display: flex;
+    flex-direction: column-reverse;
+  }
+
+  /* Scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: #888 transparent;
+
+  /* Scrollbar Track */
+  &::-webkit-scrollbar {
+    width: 5px;
+  }
+
+  /* Scrollbar Handle */
+  &::-webkit-scrollbar-thumb {
+    background: #888;
+  }
+
+  /* Scrollbar Track */
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+:root {
+  line-height: 1.25rem;
+  font-size: 16px;
+}
+
+.boot-log-type {
+  color: #666;
+  display: inline;
+}
+
+.boot-log-type-info {
+  color: #0ff;
+}
+
+.boot-log-type-warn {
+  color: #ff0;
+}
+
+.boot-log-type-system {
+  color: #fff;
+}
+
+.boot-log-type-ok {
+  color: #0f0;
+}

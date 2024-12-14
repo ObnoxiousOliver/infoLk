@@ -1,17 +1,5 @@
-import { FileElement } from "./FileElement"
+import { ComponentFile } from "./ComponentFile";
 
-export class RichTextFile extends FileElement {
-  name: string
-  type: 'file' = 'file'
-  content: HTMLElement
-
-  constructor(name: string, content: HTMLElement) {
-    super()
-    this.name = name
-    this.content = content
-  }
-
-  getContent() {
-    return this.content.outerHTML
-  }
+export class RichTextFile extends ComponentFile {
+  public readonly extension: 'txt' = 'txt'
 }
